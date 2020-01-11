@@ -10,7 +10,7 @@
 status](https://ci.appveyor.com/api/projects/status/p2jjoufya2e66oa5/branch/master?svg=true)](https://ci.appveyor.com/project/gaborcsardi/cleancall)
 [![](https://www.r-pkg.org/badges/version/cleancall)](https://cran.r-project.org/package=cleancall)
 [![CRAN RStudio mirror
-downloads](https://cranlogs.r-pkg.org/badges/cleancall)](www.r-pkg.org/pkg/cleancall)
+downloads](https://cranlogs.r-pkg.org/badges/cleancall)](https://www.r-pkg.org/pkg/cleancall)
 [![Coverage status](https://codecov.io/gh/r-lib/cleancall/branch/master/graph/badge.svg)](https://codecov.io/github/r-lib/cleancall?branch=master)
 <!-- badges: end -->
 
@@ -158,6 +158,9 @@ SEXP processx_wait(SEXP status, SEXP timeout) {
 
 You can see the [whole fix as a commit message on GitHub](https://github.com/r-lib/processx/commit/d05aadd4b0975a391d35a05958421f242bf96d23).
 
+See also our blog post at
+https://www.tidyverse.org/articles/2019/05/resource-cleanup-in-c-and-the-r-api/
+
 ## Usage
 
 ### `void r_call_on_exit(void (*fn)(void* data), void *data)`
@@ -202,5 +205,5 @@ be used to establish a cleanup stack from C code.
 MIT @ [RStudio](https://github.com/rstudio)
 
 Please note that the 'cleancall' project is released with a
-[Contributor Code of Conduct](.github/CODE_OF_CONDUCT.md). By
+[Contributor Code of Conduct](https://github.com/r-lib/cleancall/blob/master/.github/CODE_OF_CONDUCT.md). By
 contributing to this project, you agree to abide by its terms.

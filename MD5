@@ -1,9 +1,9 @@
-da9e518ddee4cd54b3324f69f67e70b6 *DESCRIPTION
+7d3aa17d77c95b931072c1efe50b95f0 *DESCRIPTION
 36c6e77092c34301572453eba654d2a6 *LICENSE
 b70fab600a9be01e1cb30ae50608dfc4 *NAMESPACE
-392ec46c107b23ab5d100f10c2a1d8a1 *NEWS.md
+2b0263df443394489c431f5fdfa61526 *NEWS.md
 d4df0908ac61ea9f8878aa9810f0a321 *R/cleancall.R
-8c0d1437979603926808fd8024277543 *inst/README.markdown
+c59e2f642a0d8c284b90a68d9c806246 *README.md
 eebad5993664bbf3c67c7b1602fbfcb6 *inst/include/cleancall.h
 d7b4161712d08bc3981f23bdc8205af2 *man/call_with_cleanup.Rd
 c33a62991c29538d54344ebef18d187e *man/cleancall-package.Rd
@@ -12,8 +12,8 @@ d153ffc24ee0584cc69fb353fd3b849f *src/cleancall.h
 b5b81a0e64875ea35c8d5d4fbe58628b *src/compat.c
 ea2c14b2526ace17c082e70be68fd0e0 *src/compat.h
 025c26ab6b545c3b4208599440d6f974 *src/init.c
-597095517040bcded20f50dd1c602507 *src/invoke.c
-ed73bc540559ca8ae2f5611c72aa943f *src/test.c
+48057198826b9500d4110d5b751d4894 *src/invoke.c
+e87fece6f15a3cae7f621bfab556ba6f *src/test.c
 3243e6239b183f1e816db0bc51b5fb8a *tests/testthat.R
 94a236094a2c87827fe0a29f0f41a6b7 *tests/testthat/helper-pushexit.R
 d9edf7861d68adbe3ecb49749627f831 *tests/testthat/test-cleancall.R

@@ -1,6 +1,6 @@
 Package: cleancall
 Title: C Resource Cleanup via Exit Handlers
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person("Lionel", "Henry", ,"lionel@rstudio.com", c("aut")),
     person("Gábor", "Csárdi", role = c("aut", "cre"),
@@ -20,10 +20,10 @@ RoxygenNote: 6.1.1
 Suggests: covr, testthat
 Depends: R (>= 3.1)
 NeedsCompilation: yes
-Packaged: 2019-05-17 17:00:20 UTC; gaborcsardi
+Packaged: 2020-01-10 14:07:15 UTC; gaborcsardi
 Author: Lionel Henry [aut],
   Gábor Csárdi [aut, cre] (<https://orcid.org/0000-0001-7098-9676>),
   RStudio [cph]
 Maintainer: Gábor Csárdi <csardi.gabor@gmail.com>
 Repository: CRAN
-Date/Publication: 2019-05-20 10:00:04 UTC
+Date/Publication: 2020-01-12 00:30:02 UTC
