@@ -5,13 +5,11 @@
 <!-- badges: start -->
 
 ![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
-[![Travis build status](https://travis-ci.org/r-lib/cleancall.svg?branch=master)](https://travis-ci.org/r-lib/cleancall)
-[![Windows Build
-status](https://ci.appveyor.com/api/projects/status/p2jjoufya2e66oa5/branch/master?svg=true)](https://ci.appveyor.com/project/gaborcsardi/cleancall)
+[![R-CMD-check](https://github.com/r-lib/cleancall/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/r-lib/cleancall/actions/workflows/R-CMD-check.yaml)
 [![](https://www.r-pkg.org/badges/version/cleancall)](https://cran.r-project.org/package=cleancall)
 [![CRAN RStudio mirror
 downloads](https://cranlogs.r-pkg.org/badges/cleancall)](https://www.r-pkg.org/pkg/cleancall)
-[![Coverage status](https://codecov.io/gh/r-lib/cleancall/branch/master/graph/badge.svg)](https://codecov.io/github/r-lib/cleancall?branch=master)
+[![Codecov test coverage](https://codecov.io/gh/r-lib/cleancall/branch/main/graph/badge.svg)](https://app.codecov.io/gh/r-lib/cleancall?branch=main)
 <!-- badges: end -->
 
 ## Features
@@ -161,6 +159,15 @@ You can see the [whole fix as a commit message on GitHub](https://github.com/r-l
 See also our blog post at
 https://www.tidyverse.org/articles/2019/05/resource-cleanup-in-c-and-the-r-api/
 
+Note that the cleanup functions cannot generally assume that
+stack-allocated data are still around at the time they are called. This is
+usually not a problem since cleanup is mostly about objects allocated on
+the heap with non-automatic storage. If needed, you can protect
+stack-allocated data from being unwound by using
+`r_with_cleanup_context()`. This becomes the point at which cleanup
+functions are called, which ensures any object allocated on the stack
+before that point are still around.
+
 ## Usage
 
 ### `void r_call_on_exit(void (*fn)(void* data), void *data)`
@@ -200,10 +207,47 @@ resource, with the appropriate cleanup function for that resource.
 Establish a cleanup stack and call `fn` with `data`. This function can
 be used to establish a cleanup stack from C code.
 
+## Embedding cleancall
+
+If you don't want to depend on the cleancall package, you can also easily
+embed the cleancall code into your package. These are the steps that you
+need to do:
+
+1. Copy the `cleancall.R` file into your package, into the `R/` directory.
+1. Copy the `cleancall.h` and `cleancall.c` files into your package,
+   into `src/`.
+1. If you have a `Makevars` and/or `Makevars.win` file, and you
+   define `OBJECTS` there, add `cleancall.o` to `OBJECTS`.
+1. Use the `CLEANCALL_METHOD_RECORD` macro in your registration of C
+   functions. E.g.
+   ```c
+   #include "cleancall.h"
+   [...]
+   static const R_CallMethodDef callMethods[]  = {
+     CLEANCALL_METHOD_RECORD,
+     [...]
+     { NULL, NULL, 0 }
+   };
+   ```
+1. Add this call to your package init function:
+   ```c
+   cleancall_init();
+   ```
+1. Use `call_with_cleanup()` instead of `.Call()` for the C functions
+   that you want to add cleanup code to.
+1. Add the `r_call_on_exit()` etc. calls to your C function(s).
+
+This is an example pull request that embeds cleancall into processx:
+https://github.com/r-lib/processx/pull/238
+(This pull request is slightly more complicated than a minimal example,
+because it uses a wrapper to `.Call` already.)
+
+## Code of Conduct
+
+Please note that the cleancall project is released with a
+[Contributor Code of Conduct](https://r-lib.github.io/cleancall/CODE_OF_CONDUCT.html).
+By contributing to this project, you agree to abide by its terms.
+
 ## License
 
 MIT @ [RStudio](https://github.com/rstudio)
-
-Please note that the 'cleancall' project is released with a
-[Contributor Code of Conduct](https://github.com/r-lib/cleancall/blob/master/.github/CODE_OF_CONDUCT.md). By
-contributing to this project, you agree to abide by its terms.

@@ -1,10 +1,68 @@
 #define R_NO_REMAP
 #include <Rinternals.h>
 
-#include "compat.h"
+#include "cleancall.h"
 
+
+#if (defined(R_VERSION) && R_VERSION < R_Version(3, 4, 0))
+ SEXP R_MakeExternalPtrFn(DL_FUNC p, SEXP tag, SEXP prot) {
+   fn_ptr ptr;
+   ptr.fn = p;
+   return R_MakeExternalPtr(ptr.p, tag, prot);
+ }
+ DL_FUNC R_ExternalPtrAddrFn(SEXP s) {
+   fn_ptr ptr;
+   ptr.p = R_ExternalPtrAddr(s);
+   return ptr.fn;
+ }
+#endif
+
+// The R API does not have a setter for function pointers
+
+SEXP cleancall_MakeExternalPtrFn(DL_FUNC p, SEXP tag, SEXP prot) {
+    fn_ptr tmp;
+    tmp.fn = p;
+    return R_MakeExternalPtr(tmp.p, tag, prot);
+}
+
+void cleancall_SetExternalPtrAddrFn(SEXP s, DL_FUNC p) {
+    fn_ptr ptr;
+    ptr.fn = p;
+    R_SetExternalPtrAddr(s, ptr.p);
+}
+
+
+// Initialised at load time with the `.Call` primitive
+SEXP cleancall_fns_dot_call = NULL;
 
 static SEXP callbacks = NULL;
+
+void cleancall_init() {
+  cleancall_fns_dot_call = Rf_findVar(Rf_install(".Call"), R_BaseEnv);
+  callbacks = R_NilValue;
+}
+
+struct eval_args {
+  SEXP call;
+  SEXP env;
+};
+
+static SEXP eval_wrap(void* data) {
+  struct eval_args* args = (struct eval_args*) data;
+  return Rf_eval(args->call, args->env);
+}
+
+
+SEXP cleancall_call(SEXP args, SEXP env) {
+  SEXP call = PROTECT(Rf_lcons(cleancall_fns_dot_call, args));
+  struct eval_args data = { call, env };
+
+  SEXP out = r_with_cleanup_context(&eval_wrap, &data);
+
+  UNPROTECT(1);
+  return out;
+}
+
 
 // Preallocate a callback
 static void push_callback(SEXP stack) {
@@ -44,8 +102,8 @@ static void call_exits(void* data) {
     top = CDR(top);
 
     void (*fn)(void*) = (void (*)(void*)) R_ExternalPtrAddrFn(CAR(cb));
-    void *data = (void*) EXTPTR_PTR(CDR(cb));
-    int early_handler = LOGICAL(EXTPTR_TAG(CDR(cb)))[0];
+    void *data = (void*) R_ExternalPtrAddr(CDR(cb));
+    int early_handler = LOGICAL(R_ExternalPtrTag(CDR(cb)))[0];
 
     // Check for empty pointer in preallocated callbacks
     if (fn) {
@@ -67,6 +125,8 @@ SEXP r_with_cleanup_context(SEXP (*fn)(void* data), void* data) {
   SEXP new = PROTECT(Rf_cons(R_NilValue, R_NilValue));
   push_callback(new);
 
+  if (!callbacks) callbacks = R_NilValue;
+
   SEXP old = callbacks;
   callbacks = new;
 
@@ -81,7 +141,7 @@ SEXP r_with_cleanup_context(SEXP (*fn)(void* data), void* data) {
 
 static void call_save_handler(void (*fn)(void *data), void* data,
                               int early) {
-  if (!callbacks) {
+  if (Rf_isNull(callbacks)) {
     fn(data);
     Rf_error("Internal error: Exit handler pushed outside "
              "of an exit context");
@@ -92,7 +152,7 @@ static void call_save_handler(void (*fn)(void *data), void* data,
   // Update pointers
   cleancall_SetExternalPtrAddrFn(CAR(cb), (DL_FUNC) fn);
   R_SetExternalPtrAddr(CDR(cb), data);
-  LOGICAL(EXTPTR_TAG(CDR(cb)))[0] = early;
+  LOGICAL(R_ExternalPtrTag(CDR(cb)))[0] = early;
 
   // Preallocate the next callback in case the allocator jumps
   push_callback(callbacks);
